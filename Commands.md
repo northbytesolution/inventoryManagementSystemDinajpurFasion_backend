@@ -39,5 +39,5 @@ npm i jsonwebtoken @types/jsonwebtoken --legacy-peer-deps
 npm i bcrypt --legacy-peer-deps
 
 <!-- Deployment -->
-npm run start:dev
+npm run start 3333
 

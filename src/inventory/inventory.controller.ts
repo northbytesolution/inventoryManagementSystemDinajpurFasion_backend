@@ -20,6 +20,7 @@ import { Roles } from 'src/utility/common/user-role.enum';
 import { CreateItemDto } from './dto/create-item.dto';
 import { CreateAttributeDto } from './dto/create-attribute.dto';
 import { CreateAttributeItemDto } from './dto/create-attributeItem.dto';
+import { UpdateAttributeDto } from './dto/update-attribute.dto';
 
 @Controller('inventory')
 export class InventoryController {
@@ -45,6 +46,7 @@ export class InventoryController {
     return await this.inventoryService.createLocation(createLocationDto);
   }
 
+  @UseGuards(AuthenticationGuard,AuthorizedGuard([Roles.ADMIN]))
   @Put('location/:id')
   updateLocation(@Param('id') id: string, @Body() location: Location): Promise<void> {
     return this.inventoryService.updateLocation(+id, location);
@@ -172,8 +174,11 @@ export class InventoryController {
 
   @UseGuards(AuthenticationGuard,AuthorizedGuard([Roles.ADMIN]))
   @Put('attributes/:id')
-  updateAttribute(@Param('id') id: string, @Body() attribute: Attribute): Promise<void> {
-    return this.inventoryService.updateAttribute(+id, attribute);
+  updateAttribute(
+    @Param('id') id: string,
+    @Body() updateAttributeDto: UpdateAttributeDto,
+  ): Promise<void> {
+    return this.inventoryService.updateAttribute(+id, updateAttributeDto);
   }
 
   @UseGuards(AuthenticationGuard,AuthorizedGuard([Roles.ADMIN]))

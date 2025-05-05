@@ -18,7 +18,7 @@ import { CreateLocationDto } from './dto/create-location.dto';
 import { CreateItemDto } from './dto/create-item.dto';
 import { CreateAttributeDto } from './dto/create-attribute.dto';
 import { CreateAttributeItemDto } from './dto/create-attributeItem.dto';
-
+import { UpdateAttributeDto } from './dto/update-attribute.dto';
 
 @Injectable()
 export class InventoryService {
@@ -187,8 +187,11 @@ export class InventoryService {
       return this.attributeRepository.save(attribute);
     }
   
-    async updateAttribute(id: number, attribute: Attribute): Promise<void> {
-      await this.attributeRepository.update(id, attribute);
+    async updateAttribute(id: number, updateData: UpdateAttributeDto): Promise<void> {
+      if (!Object.keys(updateData).length) {
+        throw new Error('No update values provided');
+      }
+      await this.attributeRepository.update(id, updateData);
     }
   
     async removeAttribute(id: number): Promise<void> {

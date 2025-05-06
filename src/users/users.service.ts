@@ -80,7 +80,11 @@ export class UsersService {
   // Access Token
   async accessToken(user: User) {
   //   return sign({id: user.id, email: user.email}, process.env.ACCESS_TOKEN_SECRET,{expiresIn: process.env.ACCESS_TOKEN_EXPIRE_TIME});
-  return sign({id: user.id, email: user.email}, process.env.ACCESS_TOKEN_SECRET,{expiresIn: '1h'});
+  return sign(
+    {id: user.id, email: user.email}, 
+    process.env.ACCESS_TOKEN_SECRET,
+    // {expiresIn: '1h'}
+  );
   }
 
 }

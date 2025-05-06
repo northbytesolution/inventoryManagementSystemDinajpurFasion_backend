@@ -19,6 +19,13 @@ import { CreateItemDto } from './dto/create-item.dto';
 import { CreateAttributeDto } from './dto/create-attribute.dto';
 import { CreateAttributeItemDto } from './dto/create-attributeItem.dto';
 import { UpdateAttributeDto } from './dto/update-attribute.dto';
+import { UpdateAttributeItemDto } from './dto/update-attributeItem.dto';
+import { UpdateBrandDto } from './dto/updated-brand.dto';
+import { UpdateTagDto } from './dto/updated-tag.dto';
+import { UpdateLocationDto } from './dto/updated-location.dto';
+import { UpdateCategoryDto } from './dto/update-category.dto';
+import { UpdateItemDto } from './dto/updated-item.dto';
+
 
 @Injectable()
 export class InventoryService {
@@ -57,8 +64,11 @@ export class InventoryService {
       return this.locationRepository.save(location);
     }
 
-    async updateLocation(id: number, location: Location): Promise<void> {
-      await this.locationRepository.update(id, location);
+    async updateLocation(id: number, updateData: UpdateLocationDto): Promise<void> {
+      if (!Object.keys(updateData).length) {
+        throw new Error('No update values provided');
+      }
+      await this.locationRepository.update(id, updateData);
     }
 
     async removeLocation(id: number): Promise<void> {
@@ -81,8 +91,11 @@ export class InventoryService {
       return this.brandRepository.save(brand);
     }
 
-    async updateBrand(id: number, brand: Brand): Promise<void> {
-      await this.brandRepository.update(id, brand);
+    async updateBrand(id: number, updateData: UpdateBrandDto): Promise<void> {
+      if (!Object.keys(updateData).length) {
+        throw new Error('No update values provided');
+      }
+      await this.brandRepository.update(id, updateData);
     }
 
     async removeBrand(id: number): Promise<void> {
@@ -106,8 +119,11 @@ export class InventoryService {
       return this.tagRepository.save(tag);
     }
 
-    async updateTag(id: number, tag: Tag): Promise<void> {
-      await this.tagRepository.update(id, tag);
+    async updateTag(id: number, updateData: UpdateTagDto): Promise<void> {
+      if (!Object.keys(updateData).length) {
+        throw new Error('No update values provided');
+      }
+      await this.tagRepository.update(id, updateData);
     }
 
     async removeTag(id: number): Promise<void> {
@@ -160,8 +176,25 @@ export class InventoryService {
       return this.categoryRepository.save(createCategoryDto);
     }
   
-    async updateCategory(id: number, category: Category): Promise<void> {
-      await this.categoryRepository.update(id, category);
+    async updateCategory(id: number, updateDto: UpdateCategoryDto): Promise<void> {
+      const updateData: Partial<Category> = {
+        name: updateDto.name,
+        slug: updateDto.slug,
+      };
+    
+      if (updateDto.parentCategoryId) {
+        const parentCategory = await this.categoryRepository.findOne({
+          where: { id: updateDto.parentCategoryId },
+        });
+        if (!parentCategory) {
+          throw new Error('Parent category not found');
+        }
+        updateData.parentCategory = parentCategory;
+      } else {
+        updateData.parentCategory = null; 
+      }
+    
+      await this.categoryRepository.update(id, updateData);
     }
   
     async removeCategory(id: number): Promise<void> {
@@ -224,8 +257,20 @@ export class InventoryService {
       return this.attributeItemRepository.save(attributeItem);
     }
   
-    async updateAttributeItem(id: number, attributeItem: AttributeItem): Promise<void> {
-      await this.attributeItemRepository.update(id, attributeItem);
+    async updateAttributeItem(id: number, updateDto: UpdateAttributeItemDto): Promise<void> {
+      const attribute = await this.attributeRepository.findOne({
+        where: { id: updateDto.attributeId },
+      });
+    
+      if (!attribute) {
+        throw new Error('Attribute not found');
+      }
+    
+      await this.attributeItemRepository.update(id, {
+        name: updateDto.name,
+        slug: updateDto.slug,
+        attribute: attribute,
+      });
     }
   
     async removeAttributeItem(id: number): Promise<void> {
@@ -308,8 +353,63 @@ export class InventoryService {
     return this.itemRepository.save(item);
   }
 
-  async updateItem(id: number, item: Item): Promise<void> {
-    await this.itemRepository.update(id, item);
+
+// Update
+  async updateItem(id: number, dto: UpdateItemDto): Promise<void> {
+    const item = await this.itemRepository.findOne({
+      where: { id },
+      relations: ['attributes', 'tags', 'relatedItems', 'brand', 'location', 'category'],
+    });
+  
+    if (!item) {
+      throw new Error('Item not found');
+    }
+  
+    item.name = dto.name;
+    item.sku = dto.sku;
+    item.slug = dto.slug;
+    item.barcode = dto.barcode;
+    item.quantity = dto.quantity;
+    item.purchasePrice = dto.purchasePrice;
+    item.sellingPrice = dto.sellingPrice;
+    item.discountPrice = dto.discountPrice || 0;
+    item.discount = dto.discount || 0;
+    item.images = dto.images;
+  
+    const location = await this.locationRepository.findOne({ where: { id: dto.locationId } });
+    if (!location) throw new Error('Location not found');
+    item.location = location;
+  
+    const brand = await this.brandRepository.findOne({ where: { id: dto.brandId } });
+    if (!brand) throw new Error('Brand not found');
+    item.brand = brand;
+  
+    const category = await this.categoryRepository.findOne({ where: { id: dto.categoryId } });
+    if (!category) throw new Error('Category not found');
+    item.category = category;
+  
+    if (dto.attributeIds && dto.attributeIds.length > 0) {
+      const attributes = await this.attributeRepository.findByIds(dto.attributeIds);
+      item.attributes = attributes;
+    } else {
+      item.attributes = [];
+    }
+  
+    if (dto.tagIds && dto.tagIds.length > 0) {
+      const tags = await this.tagRepository.findByIds(dto.tagIds);
+      item.tags = tags;
+    } else {
+      item.tags = [];
+    }
+  
+    if (dto.relatedItemIds && dto.relatedItemIds.length > 0) {
+      const relatedItems = await this.itemRepository.findByIds(dto.relatedItemIds);
+      item.relatedItems = relatedItems;
+    } else {
+      item.relatedItems = [];
+    }
+  
+    await this.itemRepository.save(item);
   }
 
   async removeItem(id: number): Promise<void> {

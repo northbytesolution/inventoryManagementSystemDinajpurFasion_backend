@@ -21,6 +21,12 @@ import { CreateItemDto } from './dto/create-item.dto';
 import { CreateAttributeDto } from './dto/create-attribute.dto';
 import { CreateAttributeItemDto } from './dto/create-attributeItem.dto';
 import { UpdateAttributeDto } from './dto/update-attribute.dto';
+import { UpdateAttributeItemDto } from './dto/update-attributeItem.dto';
+import { UpdateBrandDto } from './dto/updated-brand.dto';
+import { UpdateTagDto } from './dto/updated-tag.dto';
+import { UpdateLocationDto } from './dto/updated-location.dto';
+import { UpdateCategoryDto } from './dto/update-category.dto';
+import { UpdateItemDto } from './dto/updated-item.dto';
 
 @Controller('inventory')
 export class InventoryController {
@@ -48,8 +54,8 @@ export class InventoryController {
 
   @UseGuards(AuthenticationGuard,AuthorizedGuard([Roles.ADMIN]))
   @Put('location/:id')
-  updateLocation(@Param('id') id: string, @Body() location: Location): Promise<void> {
-    return this.inventoryService.updateLocation(+id, location);
+  updateLocation(@Param('id') id: string, @Body() UpdateLocationDto: UpdateLocationDto): Promise<void> {
+    return this.inventoryService.updateLocation(+id, UpdateLocationDto);
   }
 
   @UseGuards(AuthenticationGuard,AuthorizedGuard([Roles.ADMIN]))
@@ -80,8 +86,8 @@ export class InventoryController {
 
   @UseGuards(AuthenticationGuard,AuthorizedGuard([Roles.ADMIN]))
   @Put('brand/:id')
-  updateBrand(@Param('id') id: string, @Body() brand: Brand): Promise<void> {
-    return this.inventoryService.updateBrand(+id, brand);
+  updateBrand(@Param('id') id: string, @Body() UpdateBrandDto: UpdateBrandDto): Promise<void> {
+    return this.inventoryService.updateBrand(+id, UpdateBrandDto);
   }
 
   @UseGuards(AuthenticationGuard,AuthorizedGuard([Roles.ADMIN]))
@@ -112,8 +118,8 @@ export class InventoryController {
 
   @UseGuards(AuthenticationGuard,AuthorizedGuard([Roles.ADMIN]))
   @Put('tag/:id')
-  updateTag(@Param('id') id: string, @Body() tag: Tag): Promise<void> {
-    return this.inventoryService.updateTag(+id, tag);
+  updateTag(@Param('id') id: string, @Body() updateTagDto: UpdateTagDto): Promise<void> {
+    return this.inventoryService.updateTag(+id, updateTagDto);
   }
 
   @UseGuards(AuthenticationGuard,AuthorizedGuard([Roles.ADMIN]))
@@ -143,8 +149,8 @@ export class InventoryController {
 
   @UseGuards(AuthenticationGuard,AuthorizedGuard([Roles.ADMIN]))
   @Put('categories/:id')
-  updateCategory(@Param('id') id: string, @Body() category: Category): Promise<void> {
-    return this.inventoryService.updateCategory(+id, category);
+  updateCategory(@Param('id') id: string, @Body() updateCategoryDto: UpdateCategoryDto): Promise<void> {
+    return this.inventoryService.updateCategory(+id, updateCategoryDto);
   }
 
   @UseGuards(AuthenticationGuard,AuthorizedGuard([Roles.ADMIN]))
@@ -208,8 +214,8 @@ export class InventoryController {
 
   @UseGuards(AuthenticationGuard,AuthorizedGuard([Roles.ADMIN]))
   @Put('attribute-items/:id')
-  updateAttributeItem(@Param('id') id: string, @Body() attributeItem: AttributeItem): Promise<void> {
-    return this.inventoryService.updateAttributeItem(+id, attributeItem);
+  updateAttributeItem(@Param('id') id: string, @Body() updateAttributeItem: UpdateAttributeItemDto): Promise<void> {
+    return this.inventoryService.updateAttributeItem(+id, updateAttributeItem);
   }
 
   @UseGuards(AuthenticationGuard,AuthorizedGuard([Roles.ADMIN]))
@@ -240,8 +246,8 @@ export class InventoryController {
 
   @UseGuards(AuthenticationGuard,AuthorizedGuard([Roles.ADMIN]))
   @Put('items/:id')
-  updateItem(@Param('id') id: string, @Body() item: Item): Promise<void> {
-    return this.inventoryService.updateItem(+id, item);
+  updateItem(@Param('id') id: string, @Body() updateItemDto: UpdateItemDto): Promise<void> {
+    return this.inventoryService.updateItem(+id, updateItemDto);
   }
 
   @UseGuards(AuthenticationGuard,AuthorizedGuard([Roles.ADMIN]))

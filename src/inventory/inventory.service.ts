@@ -3,6 +3,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { Lot } from './entities/lot.entity/lot.entity';
+import { CreateLotDto } from './dto/create-lot.dto';
+import { UpdateLotDto } from './dto/update-lot.dto';
+import { Supplier } from './entities/supplier.entity/supplier.entity';
 import { Attribute } from './entities/attribute.entity/attribute.entity';
 import { AttributeItem } from './entities/attribute-item.entity/attribute-item.entity';
 import { Location } from './entities/location.entity/location.entity';
@@ -11,6 +15,7 @@ import { Brand } from './entities/brand.entity/brand.entity';
 import { Tag } from './entities/tag.entity/tag.entity';
 import { Item } from './entities/item.entity/item.entity';
 import { ItemVariation } from './entities/item-variation.entity/item-variation.entity';
+import { CreateSupplierDto } from './dto/create-supplier.dto';
 import { CreateBrandDto } from './dto/create-brand.dto';
 import { CreateTagDto } from './dto/create-tag.dto';
 import { CreateCategoryDto } from './dto/create-category.dto';
@@ -18,6 +23,7 @@ import { CreateLocationDto } from './dto/create-location.dto';
 import { CreateItemDto } from './dto/create-item.dto';
 import { CreateAttributeDto } from './dto/create-attribute.dto';
 import { CreateAttributeItemDto } from './dto/create-attributeItem.dto';
+import { UpdateSupplierDto } from './dto/update-supplier.dto';
 import { UpdateAttributeDto } from './dto/update-attribute.dto';
 import { UpdateAttributeItemDto } from './dto/update-attributeItem.dto';
 import { UpdateBrandDto } from './dto/updated-brand.dto';
@@ -30,6 +36,10 @@ import { UpdateItemDto } from './dto/updated-item.dto';
 @Injectable()
 export class InventoryService {
   constructor(
+    @InjectRepository(Lot)
+    private lotRepository: Repository<Lot>,
+    @InjectRepository(Supplier)
+    private supplierRepository: Repository<Supplier>,
     @InjectRepository(Attribute)
     private attributeRepository: Repository<Attribute>,
     @InjectRepository(AttributeItem)
@@ -47,6 +57,72 @@ export class InventoryService {
     @InjectRepository(ItemVariation)
     private itemVariationRepository: Repository<ItemVariation>,
   ) {}
+
+    // #################### Lot methods ####################
+    async findAllLots(): Promise<Lot[]> {
+      return this.lotRepository.find({ relations: ['items'] });
+    }
+
+    async findOneLot(id: number): Promise<Lot> {
+      return this.lotRepository.findOne({ where: { id }, relations: ['items'] });
+    }
+
+    async createLot(createLotDto: CreateLotDto): Promise<Lot> {
+      const lot = new Lot();
+      lot.lot_no = createLotDto.lot_no;
+      lot.name = createLotDto.name;
+      lot.total_quantity = createLotDto.total_quantity;
+      return this.lotRepository.save(lot);
+    }
+
+    async updateLot(id: number, updateData: UpdateLotDto): Promise<void> {
+      if (!Object.keys(updateData).length) {
+        throw new Error('No update values provided');
+      }
+      await this.lotRepository.update(id, updateData);
+    }
+
+    async removeLot(id: number): Promise<void> {
+      await this.lotRepository.delete(id);
+    }
+
+    // #################### Supplier methods ####################
+    async findAllSuppliers(): Promise<Supplier[]> { 
+      return this.supplierRepository.find();
+    }
+
+    async findOneSupplier(id: number): Promise<Supplier> {
+      return this.supplierRepository.findOne({ where: { id } });
+    }
+
+    async createSupplier(createSupplierDto: CreateSupplierDto): Promise<Supplier> {
+      const supplier = new Supplier();
+      supplier.name = createSupplierDto.name;
+      supplier.email = createSupplierDto.email;
+      supplier.phone = createSupplierDto.phone;
+      supplier.emergency_contact = createSupplierDto.emergency_contact;
+      supplier.address = createSupplierDto.address;
+      supplier.Type = createSupplierDto.Type;
+      supplier.remarks = createSupplierDto.remarks;
+      supplier.account_balance = createSupplierDto.account_balance || 0;
+      supplier.points = createSupplierDto.points || '0';
+      supplier.Special_Date_Type = createSupplierDto.Special_Date_Type;
+      supplier.special_dates = createSupplierDto.special_dates || null;
+      supplier.is_active = createSupplierDto.is_active || true;
+      supplier.is_wholesale = createSupplierDto.is_wholesale || false;
+      return this.supplierRepository.save(supplier);
+    }
+
+    async updateSupplier(id: number, updateData: UpdateSupplierDto): Promise<void> {
+      if (!Object.keys(updateData).length) {
+        throw new Error('No update values provided');
+      }
+      await this.supplierRepository.update(id, updateData);
+    }
+
+    async removeSupplier(id: number): Promise<void> {
+      await this.supplierRepository.delete(id);
+    }
 
     //  #################### Location methods ####################
     async findAllLocation(): Promise<Location[]> {
@@ -310,6 +386,24 @@ export class InventoryService {
     }
     item.location = location;
 
+    // Fetch and assign Lot
+    const lot = await this.lotRepository.findOne({
+      where: { id: createItemDto.lotId },
+    });
+    if (!lot) {
+      throw new Error('Lot not found');
+    }
+    item.lot = lot;
+
+    // Fetch and assign brand
+    const supplier = await this.supplierRepository.findOne({
+      where: { id: createItemDto.supplierId },
+    });
+    if (!supplier) {
+      throw new Error('Supplier not found');
+    }
+    item.supplier = supplier;
+    
     // Fetch and assign brand
     const brand = await this.brandRepository.findOne({
       where: { id: createItemDto.brandId },
@@ -358,7 +452,7 @@ export class InventoryService {
   async updateItem(id: number, dto: UpdateItemDto): Promise<void> {
     const item = await this.itemRepository.findOne({
       where: { id },
-      relations: ['attributes', 'tags', 'relatedItems', 'brand', 'location', 'category'],
+      relations: ['attributes', 'tags', 'relatedItems', 'brand', 'location', 'category', 'supplier'],
     });
   
     if (!item) {
@@ -380,6 +474,14 @@ export class InventoryService {
     if (!location) throw new Error('Location not found');
     item.location = location;
   
+    const lot = await this.lotRepository.findOne({ where: { id: dto.lotId } });
+    if (!lot) throw new Error('lot not found');
+    item.lot = lot;
+
+    const supplier = await this.supplierRepository.findOne({ where: { id: dto.supplierId } });
+    if (!supplier) throw new Error('Supplier not found');
+    item.supplier = supplier;
+
     const brand = await this.brandRepository.findOne({ where: { id: dto.brandId } });
     if (!brand) throw new Error('Brand not found');
     item.brand = brand;

@@ -2,6 +2,12 @@
 
 import { Controller, Get, Post, Body, Param, Put, Delete, UseGuards } from '@nestjs/common';
 import { InventoryService } from './inventory.service';
+import { Lot } from './entities/lot.entity/lot.entity';
+import { CreateLotDto } from './dto/create-lot.dto';
+import { UpdateLotDto } from './dto/update-lot.dto';
+import { Supplier } from './entities/supplier.entity/supplier.entity';
+import { CreateSupplierDto } from './dto/create-supplier.dto';
+import { UpdateSupplierDto } from './dto/update-supplier.dto';
 import { Attribute } from './entities/attribute.entity/attribute.entity';
 import { AttributeItem } from './entities/attribute-item.entity/attribute-item.entity';
 import { Location } from './entities/location.entity/location.entity';
@@ -31,6 +37,70 @@ import { UpdateItemDto } from './dto/updated-item.dto';
 @Controller('inventory')
 export class InventoryController {
   constructor(private readonly inventoryService: InventoryService) {}
+
+  // ############# Lot endpoints #############
+  @UseGuards(AuthenticationGuard,AuthorizedGuard([Roles.ADMIN]))
+  @Get('lot')
+  findAllLot(): Promise<Lot[]> {
+    return this.inventoryService.findAllLots();
+  }
+
+  @UseGuards(AuthenticationGuard,AuthorizedGuard([Roles.ADMIN]))
+  @Get('lot/:id')
+  findOneLot(@Param('id') id: string): Promise<Lot> {
+    return this.inventoryService.findOneLot(+id);
+  }
+
+  @UseGuards(AuthenticationGuard,AuthorizedGuard([Roles.ADMIN]))
+  @Post('lot')
+  createLot(@Body() createLotDto: CreateLotDto): Promise<Lot> {
+    return this.inventoryService.createLot(createLotDto);
+  }
+
+  @UseGuards(AuthenticationGuard,AuthorizedGuard([Roles.ADMIN]))
+  @Put('lot/:id')
+  updateLot(@Param('id') id: string, @Body() updateLotDto: UpdateLotDto): Promise<void> {
+    return this.inventoryService.updateLot(+id, updateLotDto);
+  }
+
+  @UseGuards(AuthenticationGuard,AuthorizedGuard([Roles.ADMIN]))
+  @Delete('lot/:id')
+  removeLot(@Param('id') id: string): Promise<void> {
+    return this.inventoryService.removeLot(+id);
+  }
+
+  // ############# Supplier endpoints #############
+  @UseGuards(AuthenticationGuard,AuthorizedGuard([Roles.ADMIN]))
+  @Get('supplier')
+  findAllSupplier(): Promise<Supplier[]> {
+    return this.inventoryService.findAllSuppliers();
+  }
+
+  @UseGuards(AuthenticationGuard,AuthorizedGuard([Roles.ADMIN]))
+  @Get('supplier/:id')
+  findOneSupplier(@Param('id') id: string): Promise<Supplier> {
+    return this.inventoryService.findOneSupplier(+id);
+  }
+
+  @UseGuards(AuthenticationGuard,AuthorizedGuard([Roles.ADMIN]))
+  @Post('supplier')
+  createSupplier(@Body() createSupplierDto: CreateSupplierDto): Promise<Supplier> {
+    return this.inventoryService.createSupplier(createSupplierDto);
+  }
+
+  @UseGuards(AuthenticationGuard,AuthorizedGuard([Roles.ADMIN]))
+  @Put('supplier/:id')
+  updateSupplier(@Param('id') id: string, @Body() updateSupplierDto: UpdateSupplierDto): Promise<void> {
+    return this.inventoryService.updateSupplier(+id, updateSupplierDto);
+  }
+
+  @UseGuards(AuthenticationGuard,AuthorizedGuard([Roles.ADMIN]))
+  @Delete('supplier/:id')
+  removeSupplier(@Param('id') id: string): Promise<void> {
+    return this.inventoryService.removeSupplier(+id);
+  }
+
+
 
   // #############  location endpoints #############
 

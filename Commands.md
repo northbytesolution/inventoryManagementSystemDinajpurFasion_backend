@@ -30,6 +30,7 @@ npm run migration:generate -- db/migrations/initial
 npm run migration:run
 ```
 
+<!-- For Swagger -->
 npm install @nestjs/swagger --legacy-peer-deps
 
 <!-- Token -->
@@ -41,3 +42,6 @@ npm i bcrypt --legacy-peer-deps
 <!-- Deployment -->
 npm run start 3333
 
+<!-- For Future Migrations -->
+npm run typeorm migration:generate -- -n AddLotEntityAndRelation
+npm run typeorm migration:run

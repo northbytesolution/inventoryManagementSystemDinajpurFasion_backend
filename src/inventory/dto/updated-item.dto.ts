@@ -49,6 +49,14 @@ export class UpdateItemDto {
 
   @IsNotEmpty()
   @IsNumber()
+  supplierId: number;
+
+  @IsNotEmpty()
+  @IsNumber()
+  lotId: number;
+
+  @IsNotEmpty()
+  @IsNumber()
   brandId: number;
 
   @IsOptional()

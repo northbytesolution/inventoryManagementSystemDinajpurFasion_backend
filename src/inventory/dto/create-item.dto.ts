@@ -46,6 +46,14 @@ export class CreateItemDto {
   @IsNotEmpty()
   @IsNumber()
   locationId: number;
+  
+  @IsNotEmpty()
+  @IsNumber()
+  supplierId: number;
+
+  @IsNotEmpty()
+  @IsNumber()
+  lotId: number;
 
   @IsNotEmpty()
   @IsNumber()

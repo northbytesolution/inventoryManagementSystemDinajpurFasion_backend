@@ -1,8 +1,9 @@
 /* eslint-disable prettier/prettier */
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import { Item } from '../item.entity/item.entity';
 
-@Entity('contact')
-export class Contact {
+@Entity()
+export class Supplier {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -47,6 +48,10 @@ export class Contact {
 
   @Column({ type: 'json', nullable: true })
   data: any;
+
+  @OneToMany(() => Item, item => item.supplier)
+  items: Item[];
+
 }
 
 

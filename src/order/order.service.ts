@@ -1,26 +1,47 @@
+/* eslint-disable prettier/prettier */
+
 import { Injectable } from '@nestjs/common';
-import { CreateOrderDto } from './dto/create-order.dto';
-import { UpdateOrderDto } from './dto/update-order.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Invoice } from './entities/invoice.entity';
+import { InvoiceItem } from './entities/invoice-item.entity';
+import { Customer } from './entities/customer.entity';
+import { CreateInvoiceDto } from './dto/create-invoice.dto';
+import { Item } from '../item.entity/item.entity';
 
 @Injectable()
 export class OrderService {
-  create(createOrderDto: CreateOrderDto) {
-    return 'This action adds a new order';
-  }
+  constructor(
+    @InjectRepository(Invoice)
+    private invoiceRepository: Repository<Invoice>,
+    @InjectRepository(InvoiceItem)
+    private invoiceItemRepository: Repository<InvoiceItem>,
+    @InjectRepository(Customer)
+    private customerRepository: Repository<Customer>,
+    @InjectRepository(Item)
+    private itemRepository: Repository<Item>,
+  ) {}
 
-  findAll() {
-    return `This action returns all order`;
-  }
+  async create(createInvoiceDto: CreateInvoiceDto) {
+    const customer = await this.customerRepository.findOne({
+      where: { id: Number(createInvoiceDto.customer_id) },
+    });
 
-  findOne(id: number) {
-    return `This action returns a #${id} order`;
-  }
+    const invoice = this.invoiceRepository.create({
+      ...createInvoiceDto,
+      customer,
+    });
+    const savedInvoice = await this.invoiceRepository.save(invoice);
 
-  update(id: number, updateOrderDto: UpdateOrderDto) {
-    return `This action updates a #${id} order`;
-  }
+    const items = createInvoiceDto.items.map((itemDto) => {
+      return this.invoiceItemRepository.create({
+        ...itemDto,
+        invoice: savedInvoice,
+        item: { id: Number(itemDto.item_id) } as Item,
+      });
+    });
 
-  remove(id: number) {
-    return `This action removes a #${id} order`;
+    await this.invoiceItemRepository.save(items);
+    return { invoice: savedInvoice, items };
   }
 }

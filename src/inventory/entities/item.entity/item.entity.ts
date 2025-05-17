@@ -9,6 +9,7 @@ import { Location } from '../location.entity/location.entity';
 import { Category } from '../category.entity/category.entity';
 import { ItemVariation } from '../item-variation.entity/item-variation.entity';
 import { Supplier } from '../supplier.entity/supplier.entity';  
+import { InvoiceItem } from '../../../order/entities/invoice-item.entity';
 
 @Entity()
 export class Item {
@@ -83,6 +84,9 @@ export class Item {
 
   @OneToMany(() => ItemVariation, variation => variation.item)
   variations: ItemVariation[];
+
+  @OneToMany(() => InvoiceItem, invoiceItem => invoiceItem.item)
+  invoiceItems: InvoiceItem[];
 
 
 }

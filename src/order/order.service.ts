@@ -7,7 +7,7 @@ import { Invoice } from './entities/invoice.entity';
 import { InvoiceItem } from './entities/invoice-item.entity';
 import { Customer } from './entities/customer.entity';
 import { CreateInvoiceDto } from './dto/create-invoice.dto';
-import { Item } from '../item.entity/item.entity';
+import { Item } from '../inventory/entities/item.entity/item.entity';
 
 @Injectable()
 export class OrderService {
@@ -18,8 +18,8 @@ export class OrderService {
     private invoiceItemRepository: Repository<InvoiceItem>,
     @InjectRepository(Customer)
     private customerRepository: Repository<Customer>,
-    @InjectRepository(Item)
-    private itemRepository: Repository<Item>,
+    // @InjectRepository(Item)
+    // private itemRepository: Repository<Item>,
   ) {}
 
   async create(createInvoiceDto: CreateInvoiceDto) {

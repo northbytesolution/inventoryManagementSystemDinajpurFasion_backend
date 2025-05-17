@@ -3,7 +3,7 @@
 
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 import { Invoice } from './invoice.entity';
-import { Item } from '../item.entity/item.entity';
+import { Item } from '../../inventory/entities/item.entity/item.entity';
 
 @Entity()
 export class InvoiceItem {
